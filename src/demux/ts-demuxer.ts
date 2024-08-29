@@ -34,6 +34,7 @@ import { SMPTE2038Data, smpte2038parse } from './smpte2038';
 import { MP3Data } from './mp3';
 import { AC3Config, AC3Frame, AC3Parser, EAC3Config, EAC3Frame, EAC3Parser } from './ac3';
 import { KLVData, klv_parse } from './klv';
+import { parseTimelineDescriptorNtpTimestamp } from './temi'
 
 type AdaptationFieldInfo = {
     discontinuity_indicator?: number;
@@ -138,6 +139,8 @@ class TSDemuxer extends BaseDemuxer {
     private last_pcr_: number | undefined;
     private last_pcr_base_: number = NaN;
     private timestamp_offset_: number = 0;
+
+    private last_ntp_: number | undefined;
 
     private audio_last_sample_pts_: number = undefined;
     private aac_last_incomplete_data_: Uint8Array = null;
@@ -295,11 +298,49 @@ class TSDemuxer extends BaseDemuxer {
                     adaptation_field_info.elementary_stream_priority_indicator = (data[5] & 0x20) >>> 5;
 
                     let PCR_flag = (data[5] & 0x10) >>> 4;
+                    let opcr_flag = (data[5] & 0x08) >>> 3;
+                    let splicing_point_flag = (data[5] & 0x04) >>> 2;
+                    let transport_private_data_flag = (data[5] & 0x02) >>> 1;
+                    let adaptation_field_extension_flag = data[5] & 0x01;
+
                     if (PCR_flag) {
                         let pcr_base = this.getPcrBase(data);
                         let pcr_extension = ((data[10] & 0x01) << 8) | data[11];
                         let pcr = pcr_base * 300 + pcr_extension;
                         this.last_pcr_ = pcr;
+                    }
+
+                    if (adaptation_field_extension_flag) {
+                        // parse adaptation field extension
+                        let extension_index = 6 + (PCR_flag ? 6 : 0) + (opcr_flag ? 6 : 0) + (splicing_point_flag ? 1 : 0);
+                        if (transport_private_data_flag) {
+                            let transport_private_data_length = data[extension_index];
+                            extension_index += transport_private_data_length + 1;
+                        }
+
+                        let extension_length = data[extension_index++];
+                        let extension_max_index = extension_index + extension_length;
+
+                        let ltw_flag = (data[extension_index] & 0x80) >>> 7;
+                        let piecewise_rate_flag = (data[extension_index] & 0x40) >>> 6;
+                        let seamless_splice_flag = (data[extension_index] & 0x20) >>> 5;
+                        let af_descriptor_not_present_flag = (data[extension_index] & 0x10) >>> 4;
+
+                        extension_index += 1 + (ltw_flag ? 2 : 0) + (piecewise_rate_flag ? 3 : 0) + (seamless_splice_flag ? 5 : 0)
+
+                        if (!af_descriptor_not_present_flag) {
+                            while (extension_index < extension_max_index - 2) {
+                                let af_descr_tag = data[extension_index++];
+                                let af_descr_length = data[extension_index++];
+                                if (af_descr_tag === 0x04) {
+                                    let ntp = parseTimelineDescriptorNtpTimestamp(data, extension_index, af_descr_length);
+                                    if (ntp) {
+                                        this.last_ntp_ = ntp;
+                                    }
+                                }
+                                extension_index += af_descr_length;
+                            }
+                        }
                     }
                 }
                 if (adaptation_field_control == 0x02 || 5 + adaptation_field_length === 188) {
