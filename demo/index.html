@@ -8,7 +8,7 @@
 </head>
 
 <body>
-    
+
     <div class="mainContainer">
         <div>
             <div id="streamURL">
@@ -24,6 +24,8 @@
                     <label for="withCredentials">withCredentials</label>
                     <input type="checkbox" id="liveBufferLatencyChasing" onchange="saveSettings()" checked />
                     <label for="liveBufferLatencyChasing">liveBufferLatencyChasing</label>
+                    <input type="checkbox" id="enableStashBuffer" onchange="saveSettings()" checked />
+                    <label for="enableStashBuffer">enableStashBuffer</label>
                 </div>
             </div>
             <div id="mediaSourceURL" class="hidden">
@@ -53,16 +55,16 @@
     </div>
 
     <script src="../dist/mpegts.js"></script>
-    
+
     <script>
-        var checkBoxFields = ['isLive', 'withCredentials', 'liveBufferLatencyChasing'];
+        var checkBoxFields = ['isLive', 'withCredentials', 'liveBufferLatencyChasing', 'enableStashBuffer'];
         var streamURL, mediaSourceURL;
 
         function player_load() {
             console.log('isSupported: ' + mpegts.isSupported());
             if (mediaSourceURL.className === '') {
                 var url = document.getElementById('msURL').value;
-    
+
                 var xhr = new XMLHttpRequest();
                 xhr.open('GET', url, true);
                 xhr.onload = function (e) {
@@ -102,6 +104,7 @@
                 lazyLoadMaxDuration: 3 * 60,
                 seekType: 'range',
                 liveBufferLatencyChasing: document.getElementById('liveBufferLatencyChasing').checked,
+                enableStashBuffer: document.getElementById('enableStashBuffer').checked,
             });
             player.attachMediaElement(element);
             player.load();
@@ -231,7 +234,7 @@
             player_load();
         });
     </script>
-    
+
 </body>
 
 </html>
