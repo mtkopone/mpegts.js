@@ -570,6 +570,8 @@ class TransmuxingController {
 
         info.speed = this._ioctl.currentSpeed;
         info.loaderType = this._ioctl.loaderType;
+        info.stashBufferUsed = this._ioctl._stashUsed;
+        info.stashBufferSize = this._ioctl._stashSize;
         info.currentSegmentIndex = this._currentSegmentIndex;
         info.totalSegmentCount = this._mediaDataSource.segments.length;
 
