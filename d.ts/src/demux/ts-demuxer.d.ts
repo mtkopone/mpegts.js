@@ -20,6 +20,7 @@ declare class TSDemuxer extends BaseDemuxer {
     private last_pcr_;
     private last_pcr_base_;
     private timestamp_offset_;
+    last_ntp: number | undefined;
     private audio_last_sample_pts_;
     private aac_last_incomplete_data_;
     private has_video_;
