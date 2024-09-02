@@ -574,6 +574,7 @@ class TransmuxingController {
         info.stashBufferSize = this._ioctl._stashSize;
         info.currentSegmentIndex = this._currentSegmentIndex;
         info.totalSegmentCount = this._mediaDataSource.segments.length;
+        info.lastNtpTimestamp = this._demuxer?.last_ntp;
 
         this._emitter.emit(TransmuxingEvents.STATISTICS_INFO, info);
     }

@@ -140,7 +140,7 @@ class TSDemuxer extends BaseDemuxer {
     private last_pcr_base_: number = NaN;
     private timestamp_offset_: number = 0;
 
-    private last_ntp_: number | undefined;
+    last_ntp: number | undefined = undefined;
 
     private audio_last_sample_pts_: number = undefined;
     private aac_last_incomplete_data_: Uint8Array = null;
@@ -335,7 +335,7 @@ class TSDemuxer extends BaseDemuxer {
                                 if (af_descr_tag === 0x04) {
                                     let ntp = parseTimelineDescriptorNtpTimestamp(data, extension_index, af_descr_length);
                                     if (ntp) {
-                                        this.last_ntp_ = ntp;
+                                        this.last_ntp = ntp;
                                     }
                                 }
                                 extension_index += af_descr_length;
