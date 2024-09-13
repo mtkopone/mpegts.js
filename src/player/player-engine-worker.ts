@@ -153,6 +153,7 @@ const PlayerEngineWorker = (self: DedicatedWorkerGlobalScope) => {
         mse_controller.on(MSEEvents.UPDATE_END, onMSEUpdateEnd.bind(this));
         mse_controller.on(MSEEvents.BUFFER_FULL, onMSEBufferFull.bind(this));
         mse_controller.on(MSEEvents.ERROR, onMSEError.bind(this));
+        mse_controller.on(MSEEvents.ENDED, onMSEEnded.bind(this));
         mse_controller.initialize({
             getCurrentTime: () => media_element_current_time,
             getReadyState: () => media_element_ready_state,
@@ -316,6 +317,13 @@ const PlayerEngineWorker = (self: DedicatedWorkerGlobalScope) => {
             error_detail: ErrorTypes.MEDIA_MSE_ERROR,
             info: info,
         } as WorkerMessagePacketPlayerEventError);
+    }
+
+    function onMSEEnded(): void {
+        self.postMessage({
+            msg: 'mse_event',
+            event: MSEEvents.ENDED,
+        } as WorkerMessagePacketMSEEvent);
     }
 
     function emitTransmuxingEventsRecommendSeekpoint(milliseconds: number) {

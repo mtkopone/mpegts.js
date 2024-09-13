@@ -374,6 +374,8 @@ class PlayerEngineDedicatedThread implements PlayerEngine {
                     this._onMSEUpdateEnd();
                 } else if (packet.event == MSEEvents.BUFFER_FULL) {
                     this._onMSEBufferFull();
+                } else if (packet.event == MSEEvents.ENDED) {
+                    this._emitter.emit(PlayerEvents.SOURCE_ENDED);
                 }
                 break;
             }

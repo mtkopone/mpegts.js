@@ -39,6 +39,7 @@ declare class PlayerEngineMainThread implements PlayerEngine {
     private _onMSEError;
     private _onMSEStartStreaming;
     private _onMSEEndStreaming;
+    private _onMSEEnded;
     private _onMediaLoadedMetadata;
     private _onRequestDirectSeek;
     private _onRequiredUnbufferedSeek;
