@@ -128,6 +128,7 @@ class PlayerEngineMainThread implements PlayerEngine {
         this._mse_controller.on(MSEEvents.ERROR, this._onMSEError.bind(this));
         this._mse_controller.on(MSEEvents.START_STREAMING, this._onMSEStartStreaming.bind(this));
         this._mse_controller.on(MSEEvents.END_STREAMING, this._onMSEEndStreaming.bind(this));
+        this._mse_controller.on(MSEEvents.ENDED, this._onMSEEnded.bind(this));
 
         this._mse_controller.initialize({
             getCurrentTime: () => this._media_element.currentTime,
@@ -386,6 +387,10 @@ class PlayerEngineMainThread implements PlayerEngine {
         }
         Log.v(this.TAG, 'Suspend transmuxing task due to ManagedMediaSource onEndStreaming');
         this._loading_controller.suspendTransmuxer();
+    }
+
+    private _onMSEEnded(): void {
+        this._emitter.emit(PlayerEvents.SOURCE_ENDED);
     }
 
     private _onMediaLoadedMetadata(e: any): void {
